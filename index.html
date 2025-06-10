@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>1code | Traducteur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Fira+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-green: #41e05a;
+      --main-green-dark: #188c2c;
+      --bg: #101417;
+      --panel-bg: #181f1b;
+      --white: #fff;
+      --gray: #222;
+      --shadow: 0 8px 32px 0 rgba(65,224,90,0.12);
+      --radius: 22px;
+      --transition: 0.25s cubic-bezier(.4,2,.6,1);
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Orbitron', Arial, sans-serif;
+      color: var(--main-green);
+      min-height: 100vh;
+      letter-spacing: 1px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 2.2rem 2rem 1.2rem 2rem;
+      background: var(--panel-bg);
+      border-bottom: 2px solid var(--main-green-dark);
+      box-shadow: var(--shadow);
+    }
+    header img {
+      height: 48px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #41e05a33;
+      background: transparent;
+    }
+    header h1 {
+      font-size: 2.3rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--main-green);
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px #41e05a;
+    }
+    main {
+      max-width: 950px;
+      margin: 2rem auto;
+      background: var(--panel-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.5rem 2rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      border: 1.5px solid var(--main-green-dark);
+    }
+    .lang-selectors {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      justify-content: center;
+    }
+    select, button {
+      padding: 0.7rem 1.3rem;
+      border-radius: 14px;
+      border: 2px solid var(--main-green);
+      font-size: 1.1rem;
+      background: var(--bg);
+      color: var(--main-green);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border var(--transition);
+      outline: none;
+      box-shadow: 0 2px 8px #41e05a33;
+      font-family: 'Orbitron', Arial, sans-serif;
+      letter-spacing: 1.5px;
+    }
+    button {
+      background: var(--main-green);
+      color: var(--gray);
+      border: none;
+      font-weight: 900;
+      text-shadow: 0 0 6px #41e05a;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 12px #41e05a33;
+    }
+    button:hover {
+      background: var(--main-green-dark);
+      color: #fff;
+    }
+    .code-panels {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .panel {
+      flex: 1 1 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    label {
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      color: var(--main-green);
+      letter-spacing: 1.2px;
+      font-size: 1.07rem;
+      text-shadow: 0 0 6px #41e05a;
+    }
+    textarea, pre {
+      width: 100%;
+      min-height: 200px;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      font-size: 1.08rem;
+      border-radius: 16px;
+      border: 2px solid var(--main-green-dark);
+      padding: 1.2rem;
+      background: #101417;
+      color: #aaffc3;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+      transition: border var(--transition);
+      box-shadow: 0 2px 12px #41e05a33;
+      line-height: 1.6;
+    }
+    textarea:focus {
+      border: 2px solid var(--main-green);
+      background: #181f1b;
+    }
+    pre {
+      margin: 0;
+      overflow-x: auto;
+      background: #181f1b;
+      color: #aaffc3;
+      user-select: all;
+      border: 2px solid var(--main-green-dark);
+      min-height: 200px;
+      font-size: 1.08rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: opacity 0.6s cubic-bezier(.4,2,.6,1), transform 0.6s cubic-bezier(.4,2,.6,1);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+    pre.loading {
+      color: var(--main-green);
+      opacity: 0.7;
+      font-style: italic;
+      letter-spacing: 2px;
+    }
+    pre.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      animation: code-glow 1.2s cubic-bezier(.4,2,.6,1);
+    }
+    @keyframes code-glow {
+      0% { box-shadow: 0 0 0 #41e05a; }
+      60% { box-shadow: 0 0 32px #41e05acc; }
+      100% { box-shadow: 0 0 12px #41e05a33; }
+    }
+    .actions {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      margin-top: 1.2rem;
+    }
+    .actions button {
+      font-size: 1.15rem;
+      padding: 0.8rem 2.2rem;
+      border-radius: 16px;
+    }
+    footer {
+      text-align: center;
+      padding: 1.2rem 0 0.7rem 0;
+      color: #41e05abb;
+      font-size: 1.08rem;
+      background: transparent;
+      letter-spacing: 1.2px;
+      font-family: 'Orbitron', Arial, sans-serif;
+    }
+    @media (max-width: 900px) {
+      .code-panels {
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+      main {
+        padding: 1.1rem;
+      }
+    }
+    .dot-anim span {
+      opacity: 0.2;
+      animation: blink 1.2s infinite;
+      font-size: 1.6em;
+      margin-left: 2px;
+    }
+    .dot-anim span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-anim span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo_1code-nobg.png" alt="Logo 1code">
+    <h1>Traducteur</h1>
+  </header>
+  <main>
+    <div class="lang-selectors">
+      <select id="lang-source">
+        <option value="python">Python</option>
+        <option value="kotlin">Kotlin</option>
+      </select>
+      <button id="swap-btn" title="Échanger les langages">⇄</button>
+      <select id="lang-target">
+        <option value="kotlin">Kotlin</option>
+        <option value="python">Python</option>
+      </select>
+    </div>
+    <div class="code-panels">
+      <div class="panel">
+        <label for="code-source">Code Source</label>
+        <textarea id="code-source" placeholder="Collez ou saisissez du code ici...">def greet(name):
+    print(f"Hello, {name}!")</textarea>
+      </div>
+      <div class="panel">
+        <label for="code-result">Code Traduit</label>
+        <pre id="code-result" class="loading"><span id="waiting-text">En attente de traduction...</span></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="translate-btn">Traduire</button>
+    </div>
+  </main>
+  <footer>
+    © 2025 1code · Simulation visuelle futuriste pour présentation PPP.
+  </footer>
+  <script>
+    // Exemples de traduction simulée Python <-> Kotlin
+    const translations = [
+      {
+        python: `def greet(name):\n    print(f"Hello, {name}!")`,
+        kotlin: `// Fonction pour saluer un nom
+fun greet(name: String) {
+    println("Hello, \$name!")
+}`
+      },
+      {
+        python: `for i in range(5):\n    print(i)`,
+        kotlin: `// Boucle de 0 à 4
+fun main() {
+    for (i in 0 until 5) {
+        println(i)
+    }
+}`
+      },
+      {
+        python: `age = 20\nif age >= 18:\n    print("Adulte")\nelse:\n    print("Mineur")`,
+        kotlin: `// Vérification de l'âge
+fun main() {
+    val age = 20
+    if (age >= 18) {
+        println("Adulte")
+    } else {
+        println("Mineur")
+    }
+}`
+      }
+    ];
+
+    // Inversion des langues
+    const langSource = document.getElementById('lang-source');
+    const langTarget = document.getElementById('lang-target');
+    const swapBtn = document.getElementById('swap-btn');
+    swapBtn.addEventListener('click', () => {
+      const tmp = langSource.value;
+      langSource.value = langTarget.value;
+      langTarget.value = tmp;
+      // Réinitialise la zone de résultat et remet un exemple côté source si besoin
+      const result = document.getElementById('code-result');
+      result.className = 'loading';
+      result.innerHTML = `<span id="waiting-text">En attente de traduction...</span>`;
+      document.getElementById('code-source').value = '';
+      if (langSource.value === 'python') {
+        document.getElementById('code-source').value = `def greet(name):\n    print(f"Hello, {name}!")`;
+      } else if (langSource.value === 'kotlin') {
+        document.getElementById('code-source').value = `// Fonction pour saluer un nom
+fun greet(name: String) {
+    println("Hello, \$name!")
+}`;
+      }
+    });
+
+    // Animation d'apparition du code traduit
+    function showTranslation(text) {
+      const result = document.getElementById('code-result');
+      result.className = '';
+      setTimeout(() => {
+        result.textContent = text;
+        result.classList.add('visible');
+      }, 80);
+    }
+
+    // Animation des points de chargement
+    function loadingAnimation() {
+      const result = document.getElementById('code-result');
+      result.className = 'loading';
+      result.innerHTML = `Traduction en cours<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span>`;
+    }
+
+    // Simulation de traduction
+    document.getElementById('translate-btn').addEventListener('click', () => {
+      const srcLang = langSource.value;
+      const tgtLang = langTarget.value;
+      const codeSrc = document.getElementById('code-source').value.trim();
+      const result = document.getElementById('code-result');
+      loadingAnimation();
+      setTimeout(() => {
+        let found = false;
+        if (srcLang === 'python' && tgtLang === 'kotlin') {
+          for (const pair of translations) {
+            if (codeSrc === pair.python) {
+              showTranslation(pair.kotlin);
+              found = true;
+              break;
+            }
+          }
+        } else if (srcLang === 'kotlin' && tgtLang === 'python') {
+          for (const pair of translations) {
+            if (codeSrc === pair.kotlin) {
+              showTranslation(pair.python);
+              found = true;
+              break;
+            }
+          }
+        }
+        if (!found) {
+          showTranslation('// Traduction non disponible en mode maquette.\nEssayez un exemple du tableau de la présentation.');
+        }
+      }, 1400);
+    });
+  </script>
+
+    <!-- ... (le reste du code HTML/CSS reste inchangé, voir la version précédente) ... -->
+<div class="actions">
+  <button id="examples-btn" style="background:transparent;color:var(--main-green);border:2px solid var(--main-green);margin-right:1.2rem;">
+    📚 Exemples
+  </button>
+  <button id="translate-btn">Traduire</button>
+</div>
+
+<!-- Menu d'exemples caché par défaut -->
+<div id="examples-menu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:rgba(16,20,23,0.92);align-items:center;justify-content:center;">
+  <div style="background:var(--panel-bg);border-radius:18px;padding:2rem 2.5rem;box-shadow:0 8px 32px #41e05a44;max-width:420px;width:90%;margin:auto;">
+    <h2 style="color:var(--main-green);font-family:'Orbitron',Arial,sans-serif;font-size:1.4rem;text-align:center;margin-top:0;margin-bottom:1.5rem;">Choisissez un exemple</h2>
+    <ul id="examples-list" style="list-style:none;padding:0;margin:0;">
+      <!-- Les exemples seront ajoutés ici par JS -->
+    </ul>
+    <button id="close-examples" style="margin-top:2rem;width:100%;background:var(--main-green);color:var(--gray);border:none;padding:0.7rem 0;border-radius:12px;font-weight:700;font-family:'Orbitron',Arial,sans-serif;">Fermer</button>
+  </div>
+</div>
+
+<script>
+  // ... (le reste du JS reste inchangé, à l'exception de la partie ci-dessous)
+
+  // Exemples Python <-> Kotlin
+  const examples = [
+    {
+      label: "Fonction de salutation",
+      python: `def greet(name):\n    print(f"Hello, {name}!")`
+    },
+    {
+      label: "Boucle de 0 à 4",
+      python: `for i in range(5):\n    print(i)`
+    },
+    {
+      label: "Condition sur l'âge",
+      python: `age = 20\nif age >= 18:\n    print("Adulte")\nelse:\n    print("Mineur")`
+    }
+  ];
+
+  // Affichage du menu d'exemples
+  const examplesBtn = document.getElementById('examples-btn');
+  const examplesMenu = document.getElementById('examples-menu');
+  const examplesList = document.getElementById('examples-list');
+  const closeExamples = document.getElementById('close-examples');
+  const codeSource = document.getElementById('code-source');
+  const codeResult = document.getElementById('code-result');
+
+  // Génère la liste d'exemples
+  examplesList.innerHTML = examples.map((ex, idx) =>
+    `<li style="margin-bottom:1.2rem;">
+      <button data-idx="${idx}" style="width:100%;background:var(--main-green);color:var(--gray);border:none;padding:0.7rem 0;border-radius:12px;font-weight:700;font-family:'Fira Mono',monospace;font-size:1.01rem;box-shadow:0 2px 8px #41e05a33;">
+        ${ex.label}
+      </button>
+    </li>`
+  ).join('');
+
+  // Ouvre le menu d'exemples
+  examplesBtn.onclick = () => {
+    examplesMenu.style.display = 'flex';
+  };
+  // Ferme le menu d'exemples
+  closeExamples.onclick = () => {
+    examplesMenu.style.display = 'none';
+  };
+  // Clique sur un exemple : remplit la zone source, vide la zone résultat, ferme le menu
+  examplesList.onclick = (e) => {
+    if (e.target.tagName === 'BUTTON' && e.target.dataset.idx !== undefined) {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      codeSource.value = examples[idx].python;
+      codeResult.className = 'loading';
+      codeResult.innerHTML = `<span id="waiting-text">En attente de traduction...</span>`;
+      examplesMenu.style.display = 'none';
+    }
+  };
+
+  // ... (le reste du JS pour swap et traduction reste inchangé)
+</script>
+
+</body>
+</html>
